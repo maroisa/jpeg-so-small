@@ -2,26 +2,49 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-// App struct
 type App struct {
-	ctx context.Context
+	ctx     context.Context
+	tempDir string
 }
 
-// NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{}
 }
 
-// startup is called when the app starts. The context is saved
-// so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+func (a *App) OpenDirectoryDialog() string {
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		log.Println("Error:", err)
+	}
+
+	if a.tempDir == "" {
+		a.tempDir = homedir
+	}
+
+	dirpath, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		DefaultDirectory: a.tempDir,
+	})
+	if err != nil {
+		log.Println("Error:", err)
+		return ""
+	}
+
+	a.tempDir, err = filepath.EvalSymlinks(dirpath)
+	if err != nil {
+		log.Println("Error:", err)
+		return ""
+	}
+
+	return dirpath
 }
