@@ -1,6 +1,8 @@
 <script>
     import { OpenDirectoryDialog, Compress } from "../wailsjs/go/main/App.js";
     import DirInput from "./DirInput.svelte";
+    import ProgressPopup from "./ProgressPopup.svelte";
+    import SuccessPopup from "./SuccessPopup.svelte";
 
     let qualityValue = 90;
     let inputDir = null;
@@ -9,8 +11,15 @@
     let nameFixType = "prefix"
     $: nameFix = nameFixType == "prefix" ? "min." : ".min"
 
-    window.runtime.EventsOn("onCompressed", (filename) => {
-        window.runtime.LogPrint(filename)
+    let progressValue = ""
+    let successActive = false
+
+    window.runtime.EventsOn("onCompressed", (inputPath, outputPath) => {
+        if (inputPath == "" && outputPath == ""){
+            progressValue = ""
+            return
+        }
+        progressValue = inputPath + " > " + outputPath
     })
 
     async function openDirectory(label) {
@@ -22,14 +31,19 @@
         }
     }
 
-    function compress(){
+    async function compress(){
         if (inputDir != outputDir){
             nameFix = ""
             nameFixType = ""
         }
-        Compress(inputDir, outputDir, qualityValue, nameFixType, nameFix)
+        await Compress(inputDir, outputDir, qualityValue, nameFixType, nameFix)
+        
+        successActive = true
     }
 </script>
+
+<SuccessPopup active={successActive} />
+<ProgressPopup value={progressValue} />
 
 <main class=" bg-[#21222b] text-blue-100 p-6 flex flex-col gap-4">
     <DirInput label="input" dirPath={inputDir} openDirectory={openDirectory} />

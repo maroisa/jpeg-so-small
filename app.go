@@ -66,7 +66,7 @@ func (a *App) Compress(inputDir string, outputDir string, quality int, nameFixTy
 	}
 
 	for _, entry := range entries {
-		var output string = entry.Name()
+		output := entry.Name()
 
 		if nameFixType == "prefix" {
 			output = nameFix + entry.Name()
@@ -84,7 +84,7 @@ func (a *App) Compress(inputDir string, outputDir string, quality int, nameFixTy
 		}
 
 		inputPath := filepath.Join(inputDir, entry.Name())
-		outputPath := filepath.Join(outputDir, output)
+		outputPath := filepath.Join(outputDir, output+".jpg")
 
 		err = CompressJpg(
 			quality,
@@ -98,4 +98,6 @@ func (a *App) Compress(inputDir string, outputDir string, quality int, nameFixTy
 
 		runtime.EventsEmit(a.ctx, "onCompressed", inputPath, outputPath)
 	}
+
+	runtime.EventsEmit(a.ctx, "onCompressed", "", "")
 }

@@ -47,7 +47,7 @@ func CompressJpg(quality int, entry string, output string) error {
 		return err
 	}
 
-	out, err := os.Create(output + ".jpg")
+	out, err := os.Create(output)
 	if err != nil {
 		log.Println("Failed to create image:", err)
 		return err
