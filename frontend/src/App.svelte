@@ -1,11 +1,17 @@
 <script>
-    import { OpenDirectoryDialog } from "../wailsjs/go/main/App.js";
+    import { OpenDirectoryDialog, Compress } from "../wailsjs/go/main/App.js";
     import DirInput from "./DirInput.svelte";
 
+    let qualityValue = 90;
     let inputDir = null;
     let outputDir = null;
 
-    let nameFix = "prefix"
+    let nameFixType = "prefix"
+    $: nameFix = nameFixType == "prefix" ? "min." : ".min"
+
+    window.runtime.EventsOn("onCompressed", (filename) => {
+        window.runtime.LogPrint(filename)
+    })
 
     async function openDirectory(label) {
         let filename = await OpenDirectoryDialog();
@@ -17,38 +23,41 @@
     }
 
     function compress(){
-        window.runtime.LogPrint("From: " + inputDir + " To: " + outputDir)
+        if (inputDir != outputDir){
+            nameFix = ""
+            nameFixType = ""
+        }
+        Compress(inputDir, outputDir, qualityValue, nameFixType, nameFix)
     }
 </script>
 
-<main class=" bg-[#21222b] text-blue-100 p-6 flex flex-col gap-6">
+<main class=" bg-[#21222b] text-blue-100 p-6 flex flex-col gap-4">
     <DirInput label="input" dirPath={inputDir} openDirectory={openDirectory} />
     <DirInput label="output" dirPath={outputDir} openDirectory={openDirectory} />
+    <p class="text-lg font-medium">Quality: {qualityValue}</p>
+    <input bind:value={qualityValue} type="range" min="1" max="100" class="w-full">
     {#if inputDir != null && inputDir == outputDir}
-    <div>
-        <span>seems like you has same input and output directory. Add</span>
-        <select class="p-2 card"on:change={(event) => nameFix = event.target.value}>
-            <option value="prefix">Prefix</option>
-            <option value="suffix">Suffix</option>
-        </select>
-        <span>for your files</span>
+        <div>
+            <span>seems like you has same input and output directory. Add</span>
+            <select class="p-2 card"on:change={(event) => nameFixType = event.target.value}>
+                <option value="prefix">Prefix</option>
+                <option value="suffix">Suffix</option>
+            </select>
+            <span>for your files</span>
             <div>
-                {#if nameFix == "suffix"}
+                {#if nameFixType == "suffix"}
                     <span class="text-blue-100/60">file1</span>
-                    <input value=".min" class="card mt-4 p-2" type="text">
+                    <input bind:value={nameFix} class="card mt-4 p-2" type="text">
                     <span class="text-blue-100/60">.jpg</span>
-                {:else if nameFix == "prefix"}
-                    <input value="min." class="card mt-4 p-2" type="text">
+                {:else if nameFixType == "prefix"}
+                    <input bind:value={nameFix} class="card mt-4 p-2" type="text">
                     <span class="text-blue-100/60">file1.jpg</span>
                 {/if}
             </div>
         </div>
     {/if}
-    <div class="grow card bg-transparent p-4 text-blue-100/50 overflow-auto">
-        <p class="text-center">-- Log --</p>
-        <hr class="text-blue-100/10 my-2 overflow-auto" />
-        <p></p>
-    </div>
+
+    <div class="grow"></div>
     <button 
         on:click={compress}
         disabled={!inputDir || !outputDir}
