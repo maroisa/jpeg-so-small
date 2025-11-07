@@ -1,13 +1,24 @@
 # JPEG So Small!
-JPEG So Small! is a simple application to adjust JPEG quality 
+JPEG So Small! is a simple application to adjust JPEG quality
+## Usage
+select input directory and output directory. And it will compress all the jpeg inside input directory
 
-## Live Development
+## Setup
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+jpeg-so-small is written using [Wails](https://wails.io/) with Svelte template
 
-## Building
+### Requirements
+- Go (>= v1.23)
+- pnpm (or npm/yarn, edit configuration in `wails.json`)
+- upx (optional for compression)
+- Wails ([installation](https://wails.io/docs/gettingstarted/installation))
 
-To build a redistributable, production mode package, use `wails build`.
+### Live Development
+
+```bash
+wails dev
+```
+### Build Production
+```bash
+wails build -upx
+```
